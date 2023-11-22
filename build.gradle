@@ -1,20 +1,30 @@
 plugins {
     id 'java'
+    id 'maven-publish'
+    id 'org.springframework.boot' version '2.7.9'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+group 'com.ecsimsw.utils'
+version '0.0.1'
 
 repositories {
     mavenCentral()
+//    maven { url "https://jitpack.io" }
 }
 
 dependencies {
     // spring web mvc
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
+    // spring data jpa
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // H2
+    runtimeOnly 'com.h2database:h2:1.4.199'
 
     // lombok
     compileOnly 'org.projectlombok:lombok'
@@ -30,6 +40,17 @@ dependencies {
     // junit5
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    // jitpack
+//    implementation 'com.github.jitpack:gradle-simple:1.0'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
 }
 
 test {

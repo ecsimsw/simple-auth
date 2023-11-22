@@ -1,4 +1,4 @@
-package ecsimsw.usage;
+package ecsimsw.usage.sample;
 
 import ecsimsw.auth.TokenKey;
 

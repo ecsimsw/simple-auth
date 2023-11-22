@@ -1,19 +1,12 @@
 package ecsimsw.auth;
 
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-
-import static ecsimsw.auth.TokenCookieUtils.ACCESS_TOKEN_COOKIE_KEY;
-import static ecsimsw.auth.TokenCookieUtils.getTokenFromCookies;
-
-@Component
 public class LoginUserArgumentResolver<T> implements HandlerMethodArgumentResolver {
 
     private final AuthTokenService<T> authTokenService;
@@ -29,9 +22,8 @@ public class LoginUserArgumentResolver<T> implements HandlerMethodArgumentResolv
 
     @Override
     public T resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-        final HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-        final Cookie[] cookies = request.getCookies();
-        final String accessToken = getTokenFromCookies(cookies, ACCESS_TOKEN_COOKIE_KEY);
+        var request = (HttpServletRequest) webRequest.getNativeRequest();
+        var accessToken = authTokenService.getAccessToken(request.getCookies());
         if (authTokenService.isValidToken(accessToken)) {
             return authTokenService.getPayloadFromToken(accessToken);
         }
