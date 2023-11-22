@@ -36,7 +36,6 @@ public class AuthInterceptor<T> implements HandlerInterceptor {
                 return false;
             }
         } catch (Exception e) {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
             throw new SimpleAuthException("Unauthorized request", e);
         }
     }

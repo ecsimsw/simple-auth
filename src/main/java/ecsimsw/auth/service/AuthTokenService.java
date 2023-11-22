@@ -3,7 +3,7 @@ package ecsimsw.auth.service;
 import ecsimsw.auth.anotations.TokenKey;
 import ecsimsw.auth.domain.AuthTokens;
 import ecsimsw.auth.domain.AuthTokensCacheRepository;
-import ecsimsw.auth.domain.CookieBuilder;
+import ecsimsw.auth.domain.TokenCookieHolder;
 import ecsimsw.auth.exception.AuthenticateFailedException;
 import ecsimsw.auth.exception.InvalidTokenException;
 import org.slf4j.Logger;
@@ -27,8 +27,8 @@ public class AuthTokenService<T> {
     private final Key jwtSecretKey;
     private final Class<T> payloadType;
     private final AuthTokensCacheRepository authTokensCacheRepository;
-    private final CookieBuilder accessTokenCookie;
-    private final CookieBuilder refreshTokenCookie;
+    private final TokenCookieHolder accessTokenCookie;
+    private final TokenCookieHolder refreshTokenCookie;
 
     @Value("${ecsimsw.access.token.ttl.sec}")
     private int accessTokenJwtExpireTime;
@@ -42,8 +42,8 @@ public class AuthTokenService<T> {
     public AuthTokenService(
         String jwtSecretKey,
         AuthTokensCacheRepository authTokensCacheRepository,
-        CookieBuilder accessTokenCookie,
-        CookieBuilder refreshTokenCookie,
+        TokenCookieHolder accessTokenCookie,
+        TokenCookieHolder refreshTokenCookie,
         Class<T> payloadType
     ) {
         this.jwtSecretKey = JwtUtils.createSecretKey(jwtSecretKey);
@@ -153,15 +153,8 @@ public class AuthTokenService<T> {
     }
 
     public List<Cookie> createAuthCookies(AuthTokens tokens) {
-        var atCookie = new Cookie(accessTokenCookie.getName(), tokens.getAccessToken());
-        atCookie.setHttpOnly(accessTokenCookie.isHttpOnly());
-        atCookie.setPath(accessTokenCookie.getPath());
-        atCookie.setMaxAge(accessTokenCookie.getMaxAge());
-
-        var rtCookie = new Cookie(refreshTokenCookie.getName(), tokens.getRefreshToken());
-        rtCookie.setHttpOnly(refreshTokenCookie.isHttpOnly());
-        rtCookie.setPath(refreshTokenCookie.getPath());
-        rtCookie.setMaxAge(refreshTokenCookie.getMaxAge());
+        var atCookie = accessTokenCookie.toCookie(tokens.getAccessToken());
+        var rtCookie = refreshTokenCookie.toCookie(tokens.getRefreshToken());
         return List.of(atCookie, rtCookie);
     }
 }
