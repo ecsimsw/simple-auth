@@ -1,8 +1,5 @@
-package ecsimsw.auth;
+package ecsimsw.auth.domain;
 
-import lombok.Getter;
-
-@Getter
 public class CookieBuilder {
 
     private final String name;
@@ -17,5 +14,25 @@ public class CookieBuilder {
         this.path = path;
         this.isHttpOnly = isHttpOnly;
         this.isSecure = isSecure;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getMaxAge() {
+        return maxAge;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public boolean isHttpOnly() {
+        return isHttpOnly;
+    }
+
+    public boolean isSecure() {
+        return isSecure;
     }
 }

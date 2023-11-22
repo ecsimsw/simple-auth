@@ -1,4 +1,4 @@
-package ecsimsw.auth;
+package ecsimsw.auth.anotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

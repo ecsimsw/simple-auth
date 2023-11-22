@@ -1,6 +1,10 @@
-package ecsimsw.auth;
+package ecsimsw.auth.interceptor;
 
+import ecsimsw.auth.anotations.JwtPayload;
+import ecsimsw.auth.exception.InvalidAccessTokenException;
+import ecsimsw.auth.service.AuthTokenService;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -8,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 
+@Component
 public class AuthInterceptor<T> implements HandlerInterceptor {
 
     private final AuthTokenService<T> authTokenService;
@@ -22,21 +27,13 @@ public class AuthInterceptor<T> implements HandlerInterceptor {
             return true;
         }
         try {
-            var cookies = request.getCookies();
-            var accessToken = authTokenService.getAccessToken(cookies);
-            if (authTokenService.isValidToken(accessToken)) {
+            try {
+                authTokenService.authenticate(request);
                 return true;
-            }
-            var refreshToken = authTokenService.getRefreshToken(cookies);
-            if (authTokenService.isValidToken(refreshToken)) {
-                var reissued = authTokenService.validateAndReissue(accessToken, refreshToken);
-                var newAuthCookies = authTokenService.createAuthCookies(reissued);
-                newAuthCookies.forEach(response::addCookie);
-                response.setHeader("Location", request.getRequestURI());
-                response.setStatus(HttpStatus.PERMANENT_REDIRECT.value());
+            } catch (InvalidAccessTokenException e) {
+                authTokenService.reissue(request, response);
                 return false;
             }
-            throw new IllegalArgumentException("Invalid token");
         } catch (Exception e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             throw new IllegalArgumentException("Unauthorized request");
@@ -45,6 +42,6 @@ public class AuthInterceptor<T> implements HandlerInterceptor {
 
     private boolean isLoginNeeded(HandlerMethod method) {
         return Arrays.stream(method.getMethodParameters())
-            .anyMatch(methodParameter -> methodParameter.hasParameterAnnotation(LoginUser.class));
+            .anyMatch(methodParameter -> methodParameter.hasParameterAnnotation(JwtPayload.class));
     }
 }

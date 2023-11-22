@@ -1,4 +1,4 @@
-package ecsimsw.auth;
+package ecsimsw.auth.domain;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

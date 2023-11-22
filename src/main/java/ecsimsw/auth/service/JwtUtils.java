@@ -1,4 +1,4 @@
-package ecsimsw.auth;
+package ecsimsw.auth.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -36,35 +36,7 @@ public class JwtUtils {
             .compact();
     }
 
-    public static void requireExpired(Key key, String token) {
-        if (isExpired(key, token)) {
-            return;
-        }
-        throw new IllegalArgumentException("Is not expired token");
-    }
-
-    public static void requireLived(Key key, String token) {
-        if (isExpired(key, token)) {
-            throw new IllegalArgumentException("Is not lived token");
-        }
-    }
-
-    public static boolean isExpired(Key key, String token) {
-        try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
-            return false;
-        } catch (ExpiredJwtException e) {
-            return true;
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid JWT token");
-        }
-    }
-
     public static <T> T tokenValue(Key key, String token, String claimName, Class<T> requiredType) {
-        return tokenValue(key, token, claimName, requiredType, false);
-    }
-
-    public static <T> T tokenValue(Key key, String token, String claimName, Class<T> requiredType, boolean ignoreExpired) {
         try {
             return Jwts.parserBuilder()
                 .deserializeJsonWith(new JacksonDeserializer(Maps.of(claimName, requiredType).build()))
@@ -74,10 +46,9 @@ public class JwtUtils {
                 .getBody()
                 .get(claimName, requiredType);
         } catch (ExpiredJwtException e) {
-            if (ignoreExpired) {
-                return e.getClaims().get(claimName, requiredType);
-            }
-            throw new IllegalArgumentException("This is not valid JWT token");
+            throw new IllegalArgumentException("Is not lived token");
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid JWT token");
         }
     }
 }

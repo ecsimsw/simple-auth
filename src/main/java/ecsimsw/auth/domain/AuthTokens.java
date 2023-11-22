@@ -1,11 +1,9 @@
-package ecsimsw.auth;
+package ecsimsw.auth.domain;
 
-import lombok.Getter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
-@Getter
-@RedisHash(value = "TOKEN_CACHE", timeToLive = 60 * 3)
+@RedisHash(value = "${ecsismw.token.redis.key}", timeToLive = 3600)
 public class AuthTokens {
 
     @Id
@@ -19,10 +17,15 @@ public class AuthTokens {
         this.refreshToken = refreshToken;
     }
 
-    public void checkSameWith(String accessToken, String refreshToken) {
-        if(this.accessToken.equals(accessToken) && this.refreshToken.equals(refreshToken)) {
-            return;
-        }
-        throw new IllegalArgumentException("Not sync with cached auth tokens");
+    public String getTokenKey() {
+        return tokenKey;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
     }
 }
