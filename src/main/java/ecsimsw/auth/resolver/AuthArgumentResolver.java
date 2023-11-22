@@ -1,4 +1,4 @@
-package ecsimsw.auth.interceptor;
+package ecsimsw.auth.resolver;
 
 import ecsimsw.auth.anotations.JwtPayload;
 import ecsimsw.auth.service.AuthTokenService;
@@ -11,6 +11,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import javax.servlet.http.HttpServletRequest;
 
+@Component
 public class AuthArgumentResolver<T> implements HandlerMethodArgumentResolver {
 
     private final AuthTokenService<T> authTokenService;

@@ -1,6 +1,7 @@
 package ecsimsw.auth.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ecsimsw.auth.exception.InvalidTokenException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
@@ -46,9 +47,9 @@ public class JwtUtils {
                 .getBody()
                 .get(claimName, requiredType);
         } catch (ExpiredJwtException e) {
-            throw new IllegalArgumentException("Is not lived token");
+            throw new InvalidTokenException("Is not lived token", e);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid JWT token");
+            throw new InvalidTokenException("Invalid JWT token", e);
         }
     }
 }

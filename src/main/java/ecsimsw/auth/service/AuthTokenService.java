@@ -4,7 +4,10 @@ import ecsimsw.auth.anotations.TokenKey;
 import ecsimsw.auth.domain.AuthTokens;
 import ecsimsw.auth.domain.AuthTokensCacheRepository;
 import ecsimsw.auth.domain.CookieBuilder;
-import ecsimsw.auth.exception.InvalidAccessTokenException;
+import ecsimsw.auth.exception.AuthenticateFailedException;
+import ecsimsw.auth.exception.InvalidTokenException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 
@@ -19,15 +22,20 @@ import java.util.Optional;
 
 public class AuthTokenService<T> {
 
+    private final Logger LOGGER = LoggerFactory.getLogger(AuthTokenService.class);
+
     private final Key jwtSecretKey;
     private final Class<T> payloadType;
     private final AuthTokensCacheRepository authTokensCacheRepository;
     private final CookieBuilder accessTokenCookie;
     private final CookieBuilder refreshTokenCookie;
+
     @Value("${ecsimsw.access.token.ttl.sec}")
     private int accessTokenJwtExpireTime;
+
     @Value("${ecsimsw.refresh.token.ttl.sec}")
     private int refreshTokenJwtExpireTime;
+
     @Value("${ecsimsw.token.payload.name}")
     private String jwtPayloadName;
 
@@ -53,7 +61,7 @@ public class AuthTokenService<T> {
     public AuthTokens issueAuthTokens(T payload) {
         var tokenKey = getTokenKey(payload);
         if (tokenKey == null) {
-            throw new IllegalArgumentException("token key must not be null");
+            throw new InvalidTokenException("token key must not be null");
         }
         authTokensCacheRepository.deleteById(tokenKey);
 
@@ -68,7 +76,7 @@ public class AuthTokenService<T> {
         var cookies = request.getCookies();
         var accessToken = getTokenFromCookies(cookies, accessTokenCookie.getName());
         if (accessToken.isEmpty() || !isValidToken(accessToken.get())) {
-            throw new InvalidAccessTokenException("Access token is not available");
+            throw new AuthenticateFailedException("Access token is not available");
         }
     }
 
@@ -77,11 +85,11 @@ public class AuthTokenService<T> {
             var field = Arrays.stream(payload.getClass().getDeclaredFields())
                 .filter(it -> it.isAnnotationPresent(TokenKey.class))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Payload class doesn't have TokenKey."));
+                .orElseThrow(() -> new InvalidTokenException("Payload class doesn't have TokenKey."));
             field.setAccessible(true);
             return (String) field.get(payload);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid token");
+            throw new InvalidTokenException("Invalid token", e);
         }
     }
 
@@ -93,23 +101,24 @@ public class AuthTokenService<T> {
         var cookies = request.getCookies();
         var refreshToken = getTokenFromCookies(cookies, refreshTokenCookie.getName());
         if (refreshToken.isEmpty()) {
-            throw new IllegalArgumentException("Refresh token not exists");
+            throw new InvalidTokenException("Refresh token not exists");
         }
         var reissue = reissueAuthTokens(refreshToken.get());
         createAuthCookies(reissue).forEach(response::addCookie);
-        System.out.println("token reissued");
         response.setHeader("Location", request.getRequestURI());
         response.setStatus(HttpStatus.PERMANENT_REDIRECT.value());
+
+        LOGGER.info("simple auth : Token reissued with refresh token");
     }
 
     private AuthTokens reissueAuthTokens(String refreshToken) {
         if (!isValidToken(refreshToken)) {
-            throw new IllegalArgumentException("Is not valid token");
+            throw new InvalidTokenException("Is not valid token");
         }
         var payload = JwtUtils.tokenValue(jwtSecretKey, refreshToken, jwtPayloadName, payloadType);
         var tokenKey = getTokenKey(payload);
         if (!authTokensCacheRepository.existsById(tokenKey)) {
-            throw new IllegalArgumentException("Not registered refresh token");
+            throw new InvalidTokenException("Not registered refresh token");
         }
         return issueAuthTokens(payload);
     }
@@ -135,7 +144,7 @@ public class AuthTokenService<T> {
 
     public T getAccessTokenPayload(HttpServletRequest request) {
         final String token = getTokenFromCookies(request.getCookies(), accessTokenCookie.getName())
-            .orElseThrow(() -> new IllegalArgumentException("Token cookie not exists"));
+            .orElseThrow(() -> new InvalidTokenException("Token cookie not exists"));
         return getPayloadFromToken(token);
     }
 

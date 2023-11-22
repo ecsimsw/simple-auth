@@ -1,7 +1,8 @@
 package ecsimsw.auth.interceptor;
 
 import ecsimsw.auth.anotations.JwtPayload;
-import ecsimsw.auth.exception.InvalidAccessTokenException;
+import ecsimsw.auth.exception.AuthenticateFailedException;
+import ecsimsw.auth.exception.SimpleAuthException;
 import ecsimsw.auth.service.AuthTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 
+@Component
 public class AuthInterceptor<T> implements HandlerInterceptor {
 
     private final AuthTokenService<T> authTokenService;
@@ -29,13 +31,13 @@ public class AuthInterceptor<T> implements HandlerInterceptor {
             try {
                 authTokenService.authenticate(request);
                 return true;
-            } catch (InvalidAccessTokenException e) {
+            } catch (AuthenticateFailedException e) {
                 authTokenService.reissue(request, response);
                 return false;
             }
         } catch (Exception e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            throw new IllegalArgumentException("Unauthorized request");
+            throw new SimpleAuthException("Unauthorized request", e);
         }
     }
 
