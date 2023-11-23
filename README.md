@@ -1,6 +1,6 @@
 # simple-auth
 Spring 에서 인증 토큰 처리를 도와주는 라이브러리    
-Latest version : 2.0.0
+Latest version : 2.0.1
 
 ## Feature 
 - Access, Refresh token 생성, 쿠키에 추가 된다.
@@ -54,7 +54,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.ecsimsw:simple-auth:2.0.0'
+    implementation 'com.github.ecsimsw:simple-auth:2.0.1'
 }
 ```
 #### 2. application.properties
