@@ -4,7 +4,6 @@ import ecsimsw.auth.anotations.JwtPayload;
 import ecsimsw.auth.exception.AuthenticateFailedException;
 import ecsimsw.auth.exception.SimpleAuthException;
 import ecsimsw.auth.service.AuthTokenService;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -36,7 +35,7 @@ public class AuthInterceptor<T> implements HandlerInterceptor {
                 return false;
             }
         } catch (Exception e) {
-            throw new SimpleAuthException("Unauthorized request", e);
+            throw new SimpleAuthException("Unauthorized request");
         }
     }
 
