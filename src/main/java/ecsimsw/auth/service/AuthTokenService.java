@@ -111,6 +111,10 @@ public class AuthTokenService<T> {
         LOGGER.info("simple auth : Token reissued with refresh token");
     }
 
+    public void revoke(String tokenKey) {
+        authTokensCacheRepository.deleteById(tokenKey);
+    }
+
     private AuthTokens reissueAuthTokens(String refreshToken) {
         if (!isValidToken(refreshToken)) {
             throw new InvalidTokenException("Is not valid token");
