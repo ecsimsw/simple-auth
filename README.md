@@ -22,6 +22,7 @@ public class SampleController {
         this.authTokenService = authTokenService;
     }
 
+    // 1. 토큰 생성, 쿠키 응답
     @PostMapping("/sample/auth")
     public ResponseEntity<String> login(String username, HttpServletResponse response) {
         var userInfo = new MyLoginPayload(username, "ecsimsw@gmail.com");
@@ -29,15 +30,17 @@ public class SampleController {
         return ResponseEntity.ok().build();
     }
 
+    // 2. JWT 토큰 인증, 커스텀 Payload resolve
+    @GetMapping("/sample/auth")
+    public ResponseEntity<String> auth(@JwtPayload MyLoginPayload info) {
+        return ResponseEntity.ok(info.getName() + " " + info.getEmail());
+    }
+
+    // 3. Refresh token 무효화
     @DeleteMapping("/sample/auth")
     public ResponseEntity<Void> revoke(String username) {
         authTokenService.revoke(username);
         return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/sample/auth")
-    public ResponseEntity<String> auth(@JwtPayload MyLoginPayload info) {
-        return ResponseEntity.ok(info.getName() + " " + info.getEmail());
     }
 }
 ```
