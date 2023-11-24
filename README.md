@@ -32,7 +32,7 @@ public class SampleController {
 
     // 2. JWT 토큰 인증, 커스텀 Payload resolve
     @GetMapping("/sample/auth")
-    public ResponseEntity<String> auth(@JwtPayload MyLoginPayload info) {
+    public ResponseEntity<String> auth(@JwtPayload MyCustomPayload info) {
         return ResponseEntity.ok(info.getName() + " " + info.getEmail());
     }
 
@@ -52,7 +52,6 @@ public class SampleController {
 repositories {
     maven { url 'https://jitpack.io' }
 }
-
 dependencies {
     implementation 'com.github.ecsimsw:simple-auth:2.0.1'
 }
@@ -70,16 +69,10 @@ ecsimsw.refresh.token.ttl.sec= 172800
 ecsimsw.token.payload.name=myTokenPayload
 ecsimsw.token.secret.key=ecsimswtemptokensecretqwertyqwerty123123123
 ```
-#### 3. Attach @EnableSimpleAuth
+
+#### 3. 토큰 Payload에 담을 내용 정의
 ``` java
-@EnableSimpleAuth
-@SpringBootApplication
-public class SampleApplication {
-}
-```
-#### 4. 토큰 Payload 정의
-``` java
-public class MyLoginPayload {
+public class MyCustomPayload {
     @TokenKey
     private String name;
     private String email;
@@ -87,9 +80,10 @@ public class MyLoginPayload {
 Token에 포함될 정보를 Class로 정의한다. 타입 이름부터 프로퍼티 수, 이름, 타입 모두 커스텀 가능하다.    
 단 인증에 사용될 하나의 String 타입 프로퍼티에 @TokenKey 를 붙어야 하고, 빈 생성자, Getter/Setter 가 존재해야 한다.
 
-#### 5. AuthTokenService 정의
+#### 4. @EnableSimpleAuth, AuthTokenService 설정
 
 ``` java
+@EnableSimpleAuth
 @Configuration
 public class AuthTokenConfig implements WebMvcConfigurer {
 
@@ -105,7 +99,7 @@ public class AuthTokenConfig implements WebMvcConfigurer {
             authTokensCacheRepository,
             atCookieHolder,
             rtCookieHolder,
-            MyLoginPayload.class
+            MyCustomPayload.class
         );
     }
 }
