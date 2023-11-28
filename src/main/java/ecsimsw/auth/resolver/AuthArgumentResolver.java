@@ -1,4 +1,4 @@
-package ecsimsw.auth.interceptor;
+package ecsimsw.auth.resolver;
 
 import ecsimsw.auth.anotations.JwtPayload;
 import ecsimsw.auth.service.AuthTokenService;

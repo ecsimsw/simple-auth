@@ -1,7 +1,7 @@
-package ecsimsw.auth.sample;
+package ecsimsw.auth.config;
 
-import ecsimsw.auth.interceptor.AuthArgumentResolver;
 import ecsimsw.auth.interceptor.AuthInterceptor;
+import ecsimsw.auth.resolver.AuthArgumentResolver;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -10,12 +10,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.List;
 
 @Configuration
-public class WebConfig implements WebMvcConfigurer {
+public class SimpleAuthWebConfig implements WebMvcConfigurer {
 
     private final AuthInterceptor loginUserInfoAuthInterceptor;
     private final AuthArgumentResolver authArgumentResolver;
 
-    public WebConfig(
+    public SimpleAuthWebConfig(
         AuthInterceptor loginUserInfoAuthInterceptor,
         AuthArgumentResolver authArgumentResolver
     ) {
