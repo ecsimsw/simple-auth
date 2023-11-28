@@ -121,9 +121,9 @@ public class AuthTokenService<T> {
         }
         var payload = JwtUtils.tokenValue(jwtSecretKey, refreshToken, jwtPayloadName, payloadType);
         var tokenKey = getTokenKey(payload);
-        if (!authTokensCacheRepository.existsById(tokenKey)) {
-            throw new InvalidTokenException("Not registered refresh token");
-        }
+        var currentCachedToken = authTokensCacheRepository.findById(tokenKey)
+            .orElseThrow(() -> new InvalidTokenException("Not registered refresh token"));
+        currentCachedToken.requireRefreshTokenSame(refreshToken);
         return issueAuthTokens(payload);
     }
 

@@ -1,5 +1,6 @@
 package ecsimsw.auth.domain;
 
+import ecsimsw.auth.exception.InvalidTokenException;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
@@ -27,5 +28,11 @@ public class AuthTokens {
 
     public String getRefreshToken() {
         return refreshToken;
+    }
+
+    public void requireRefreshTokenSame(String refreshToken) {
+        if(!this.refreshToken.equals(refreshToken)) {
+            throw new InvalidTokenException("Not registered refresh token");
+        }
     }
 }
