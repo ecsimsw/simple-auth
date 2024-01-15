@@ -2,7 +2,7 @@
 Spring 에서 토큰 인증 처리를 도와주는 라이브러리    
 Latest version : 2.0.4
 
-## Feature 
+## 기능들
 - Access, Refresh token 생성, 쿠키에 추가 된다.
 - Accees token으로 인증이 불가능한 경우 Refresh token으로 토큰을 재발행한다.
 - Refresh token 탈취시 해당 토큰을 무효화할 수 있다.
