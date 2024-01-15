@@ -1,5 +1,5 @@
 # simple-auth
-Spring 에서 인증 토큰 처리를 도와주는 라이브러리    
+Spring 에서 토큰 인증 처리를 도와주는 라이브러리    
 Latest version : 2.0.4
 
 ## Feature 
